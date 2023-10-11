@@ -32,7 +32,9 @@ while game_running:
 
     keys = pygame.key.get_pressed()
     mods = pygame.key.get_mods()
-    if keys[K_LEFT]:
+    if keys[K_SPACE]:
+        char.jump()
+    elif keys[K_LEFT]:
         if mods & KMOD_SHIFT:
             char.run(Direction.LEFT)
         else:
