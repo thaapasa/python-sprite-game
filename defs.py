@@ -1,9 +1,11 @@
 from enum import Enum
 
-# Constants
+# Speeds are pixels per second
+WALKING_SPEED = 240
+RUNNING_SPEED = 360
+
 SCREEN_WIDTH = 1280
 SCREEN_HEIGHT = 720
-WALKING_SPEED = 240  # pixels per second
 
 SPRITE_WIDTH = 128
 SPRITE_HEIGHT = 128

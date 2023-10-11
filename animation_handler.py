@@ -29,6 +29,9 @@ class AnimationHandler:
             self.current_frame = (self.current_frame + 1) % self.frame_count
             self.elapsed_time -= self.frame_duration
 
+    def reset(self):
+        self.current_frame = 0
+
     def get_current_frame(self, forward):
         """Return the current frame as a Surface."""
         frames = self.frames if forward else self.frames_reverse

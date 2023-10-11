@@ -31,10 +31,17 @@ while game_running:
                 game_running = False
 
     keys = pygame.key.get_pressed()
+    mods = pygame.key.get_mods()
     if keys[K_LEFT]:
-        char.walk(Direction.LEFT)
+        if mods & KMOD_SHIFT:
+            char.run(Direction.LEFT)
+        else:
+            char.walk(Direction.LEFT)
     elif keys[K_RIGHT]:
-        char.walk(Direction.RIGHT)
+        if mods & KMOD_SHIFT:
+            char.run(Direction.RIGHT)
+        else:
+            char.walk(Direction.RIGHT)
     else:
         char.idle()
 
