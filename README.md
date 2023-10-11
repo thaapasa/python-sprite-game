@@ -4,6 +4,8 @@ A simple 2D game developed using Python and Pygame. Control a
 character, make it walk, run, and interact within a 2D
 environment.
 
+![Screenshot](./screenshot.png)
+
 ## Features
 
 - **Character Movement**: Use arrow keys to move the character left
