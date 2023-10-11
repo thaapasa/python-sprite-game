@@ -1,0 +1,10 @@
+# Constants
+SCREEN_WIDTH = 1200
+SCREEN_HEIGHT = 800
+CHARACTER_SPEED = 240 # pixels per second
+
+SPRITE_WIDTH = 128
+SPRITE_HEIGHT = 128
+
+# Colors
+WHITE = (255, 255, 255)

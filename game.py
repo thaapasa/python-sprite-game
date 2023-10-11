@@ -1,19 +1,10 @@
 import pygame
 from pygame.locals import *
+from defs import SCREEN_WIDTH, SCREEN_HEIGHT, CHARACTER_SPEED, WHITE
+from animation_handler import AnimationHandler
 
 # Initialize pygame
 pygame.init()
-
-# Constants
-SCREEN_WIDTH = 1200
-SCREEN_HEIGHT = 800
-CHARACTER_SPEED = 240 # pixels per second
-
-SPRITE_WIDTH = 128
-SPRITE_HEIGHT = 128
-
-# Colors
-WHITE = (255, 255, 255)
 
 # Set up the screen
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -30,14 +21,8 @@ walk_sheet = pygame.image.load('sprites/walk-tileset.png')
 walk_frames = []
 reverse_walk_frames = []
 
-for x in range(8):
-  frame_rect = pygame.Rect(x * SPRITE_WIDTH, 0, SPRITE_WIDTH, SPRITE_HEIGHT)
-  frame_image = walk_sheet.subsurface(frame_rect)
-  walk_frames.append(frame_image)
-  flipped_image = pygame.transform.flip(frame_image, True, False)
-  reverse_walk_frames.append(flipped_image)
+walk_animation = AnimationHandler('sprites/walk-tileset.png', 8, 0.05) 
 
-goingRight = True
 clock = pygame.time.Clock()
 # Main game loop
 running = True
@@ -55,19 +40,17 @@ while running:
 
   keys = pygame.key.get_pressed()
   if keys[K_LEFT]:
+    walk_animation.set_direction(False)
     character_rect.move_ip(-CHARACTER_SPEED * dt, 0)
-    walkFrame += 1
-    walkFrame %= 8
-    goingRight = False
+    walk_animation.update(dt)
   if keys[K_RIGHT]:
+    walk_animation.set_direction(True)
     character_rect.move_ip(CHARACTER_SPEED * dt, 0)
-    walkFrame += 1
-    walkFrame %= 8
-    goingRight = True
+    walk_animation.update(dt)
 
   # Drawing
   screen.fill(WHITE)
-  screen.blit((walk_frames if goingRight else reverse_walk_frames)[walkFrame], character_rect.topleft)
+  screen.blit(walk_animation.get_current_frame(), character_rect.topleft)
 
   pygame.display.flip()
 
