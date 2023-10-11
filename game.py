@@ -10,16 +10,12 @@ pygame.init()
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption('Sprite Knight')
 
+background = pygame.image.load('sprites/background.png')
+
 # Load character sprite
 character = pygame.image.load('sprites/idle.png')
 character_rect = character.get_rect()
 character_rect.topleft = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
-
-# Load the sprite sheet
-walk_sheet = pygame.image.load('sprites/walk-tileset.png')
-
-walk_frames = []
-reverse_walk_frames = []
 
 walk_animation = AnimationHandler('sprites/walk-tileset.png', 8, 0.05) 
 
@@ -49,7 +45,7 @@ while running:
     walk_animation.update(dt)
 
   # Drawing
-  screen.fill(WHITE)
+  screen.blit(background, (0,0))
   screen.blit(walk_animation.get_current_frame(), character_rect.topleft)
 
   pygame.display.flip()
