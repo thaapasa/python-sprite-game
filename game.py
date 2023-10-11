@@ -2,6 +2,7 @@ import pygame
 from pygame.locals import *
 from defs import SCREEN_WIDTH, SCREEN_HEIGHT, Direction
 from character_handler import CharacterHandler
+from level_handler import LevelHandler
 
 # Initialize pygame
 pygame.init()
@@ -16,6 +17,8 @@ background = pygame.image.load("sprites/background.png")
 clock = pygame.time.Clock()
 
 char = CharacterHandler()
+
+level = LevelHandler("level.txt", 40, 23)
 
 # Main game loop
 game_running = True

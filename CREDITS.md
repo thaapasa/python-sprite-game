@@ -12,3 +12,8 @@ The character set is the
 
 The background image is taken from
 [Forest battle backgrounds](https://craftpix.net/freebies/free-forest-battle-backgrounds/).
+
+## Background tileset
+
+The background tileset is the
+[Green zone tileset](https://craftpix.net/freebies/free-green-zone-tileset-pixel-art/).
