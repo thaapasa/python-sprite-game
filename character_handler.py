@@ -24,7 +24,7 @@ class CharState(Enum):
 class CharacterHandler:
     def __init__(self):
         self.rect = pygame.Rect(
-            SCREEN_WIDTH // 3, SCREEN_HEIGHT // 2, SPRITE_WIDTH, SPRITE_HEIGHT
+            14 * 32 - 128, 19 * 32 - 128, SPRITE_WIDTH, SPRITE_HEIGHT
         )
 
         # Load animations

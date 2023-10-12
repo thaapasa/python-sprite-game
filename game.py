@@ -53,8 +53,7 @@ while game_running:
     char.update(dt)
 
     # Drawing
-    # screen.blit(background, (0, 0))
-    screen.fill(WHITE)
+    screen.blit(background, (0, 0))
     level.draw(screen)
     char.draw(screen)
 
