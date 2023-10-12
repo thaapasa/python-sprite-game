@@ -2,30 +2,36 @@ import pygame
 from enum import Enum
 
 
+TILE_WIDTH = 32
+TILE_HEIGHT = 32
+
+
 class TileType(Enum):
-    EMPTY = (" ", "")
-    GROUND = ("#", "ground")
-    TOP = ("^", "ground-top")
-    BOTTOM = ("v", "ground-b")
-    LEFT = ("<", "ground-l")
-    RIGHT = (">", "ground-r")
-    TOP_LEFT = ("┌", "ground-tl")
-    TOP_RIGHT = ("┐", "ground-tr")
-    BOTTOM_LEFT = ("└", "ground-bl")
-    BOTTOM_RIGHT = ("┘", "ground-br")
-    TOP_BOTTOM_LEFT = ("├", "ground-tbl")
-    TOP_BOTTOM_RIGHT = ("┤", "ground-tbr")
-    TOP_RIGHT_LEFT = ("┬", "ground-trl")
-    BOTTOM_RIGHT_LEFT = ("┴", "ground-brl")
-    ALL_BORDERS = ("┼", "ground-all")
+    EMPTY = (" ", -1, -1)
+    GROUND = ("#", 5, 5)
+    TOP = ("^", 1, 0)
+    BOTTOM = ("v", 8, 4)
+    LEFT = ("<", 0, 1)
+    RIGHT = (">", 3, 1)
+    LEFT_RIGHT = ("H", 4, 1)
+    TOP_LEFT = ("┌", 0, 0)
+    TOP_RIGHT = ("┐", 2, 0)
+    TOP_BOTTOM = ("=", 1, 4)
+    BOTTOM_LEFT = ("└", 7, 4)
+    BOTTOM_RIGHT = ("┘", 9, 4)
+    TOP_BOTTOM_LEFT = ("├", 0, 4)
+    TOP_BOTTOM_RIGHT = ("┤", 2, 4)
+    TOP_RIGHT_LEFT = ("┬", 4, 0)
+    BOTTOM_RIGHT_LEFT = ("┴", 8, 4)
+    ALL_BORDERS = ("┼", 5, 2)
 
     @property
     def char(self):
         return self.value[0]
 
     @property
-    def filename(self):
-        return self.value[1]
+    def tile_pos(self):
+        return (self.value[1], self.value[2])
 
     @classmethod
     def from_char(cls, char):
@@ -37,10 +43,28 @@ TileType._lookup_map = {member.char: member for member in TileType}
 
 class LevelHandler:
     def __init__(self, level, width, height):
-        self.level = self._load(level, width, height)
-        print("Level", self.level)
+        self.width = width
+        self.height = height
+        self.level = self._load_level(level, width, height)
+        # Setup images
+        self.tiles = self._setup_tiles()
+        print("Tiles", self.tiles)
 
-    def _load(self, level, width, height):
+    def _setup_tiles(self):
+        # Load background
+        tileset = pygame.image.load("sprites/background-tileset.png")
+        return {member.char: self._extract_tile(member, tileset) for member in TileType}
+
+    def _extract_tile(self, tile, tileset):
+        pos = tile.tile_pos
+        if pos[0] < 0 or pos[1] < 0:
+            return pygame.Surface((32, 32), pygame.SRCALPHA)
+        frame_rect = pygame.Rect(
+            pos[0] * TILE_WIDTH, pos[1] * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT
+        )
+        return tileset.subsurface(frame_rect)
+
+    def _load_level(self, level, width, height):
         with open(level, "r") as file:
             lines = file.readlines()
 
@@ -48,7 +72,7 @@ class LevelHandler:
         level = [
             [
                 TileType.from_char(char) if len(line) > col else TileType.EMPTY
-                for col, char in enumerate(line.strip())
+                for col, char in enumerate(line)
             ]
             for line in lines
         ]
@@ -62,3 +86,10 @@ class LevelHandler:
             while len(row) < width:
                 row.append(TileType.EMPTY)
         return level
+
+    def draw(self, screen):
+        for x in range(self.width):
+            for y in range(self.height):
+                tile = self.level[y][x]
+                image = self.tiles[tile.char]
+                screen.blit(image, (x * TILE_WIDTH, y * TILE_HEIGHT))

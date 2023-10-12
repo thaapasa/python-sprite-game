@@ -1,6 +1,6 @@
 import pygame
 from pygame.locals import *
-from defs import SCREEN_WIDTH, SCREEN_HEIGHT, Direction
+from defs import SCREEN_WIDTH, SCREEN_HEIGHT, WHITE, Direction
 from character_handler import CharacterHandler
 from level_handler import LevelHandler
 
@@ -53,7 +53,9 @@ while game_running:
     char.update(dt)
 
     # Drawing
-    screen.blit(background, (0, 0))
+    # screen.blit(background, (0, 0))
+    screen.fill(WHITE)
+    level.draw(screen)
     char.draw(screen)
 
     pygame.display.flip()
