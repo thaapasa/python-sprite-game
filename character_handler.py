@@ -6,10 +6,10 @@ from defs import (
     SPRITE_HEIGHT,
     WALKING_SPEED,
     RUNNING_SPEED,
-    JUMP_LENGTH,
-    JUMP_HEIGHT,
     DRAW_BBOX,
+    JUMP_VELOCITY,
     BLUE,
+    GRAVITY,
     Direction,
 )
 from animation_handler import AnimationHandler
@@ -27,6 +27,9 @@ BBOX_WIDTH = 48
 BBOX_HEIGHT = 74
 
 
+DIR_MULT = {Direction.LEFT: -1, Direction.RIGHT: 1}
+
+
 class CharacterHandler(pygame.sprite.Sprite):
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
@@ -38,14 +41,14 @@ class CharacterHandler(pygame.sprite.Sprite):
             BBOX_WIDTH / 2 - SPRITE_WIDTH / 2,
             -(SPRITE_HEIGHT - BBOX_HEIGHT),
         )
+        self.velocity_x = 0
+        self.velocity_y = 0
 
         # Load animations
         self.idle_animation = AnimationHandler("sprites/idle-tileset.png", 8, 0.07)
         self.walk_animation = AnimationHandler("sprites/walk-tileset.png", 8, 0.05)
         self.run_animation = AnimationHandler("sprites/run-tileset.png", 8, 0.04)
-        self.jump_animation = AnimationHandler(
-            "sprites/jump-tileset.png", 8, JUMP_LENGTH / 8
-        )
+        self.jump_animation = AnimationHandler("sprites/jump-tileset.png", 8, 0.05)
 
         self.state = CharState.IDLE
         self.state_anims = {
@@ -54,56 +57,34 @@ class CharacterHandler(pygame.sprite.Sprite):
             CharState.RUNNING: self.run_animation,
             CharState.JUMPING: self.jump_animation,
         }
-        self.direction = Direction.RIGHT
 
-        self.jump_timer = 0
-        self.jump_speed = WALKING_SPEED
-        self.jump_start = (0, 0)
-
-    def walk(self, direction):
-        if self.state is CharState.JUMPING:
-            return
-        self.direction = direction
-        if self.state is not CharState.WALKING:
+    def walk(self, direction: Direction):
+        self.velocity_x = DIR_MULT[direction] * WALKING_SPEED
+        if self.state is not CharState.WALKING and self.state is not CharState.JUMPING:
             self.state = CharState.WALKING
             self.walk_animation.reset()
 
     def run(self, direction):
-        if self.state is CharState.JUMPING:
-            return
-        self.direction = direction
-        if self.state is not CharState.RUNNING:
+        self.velocity_x = DIR_MULT[direction] * RUNNING_SPEED
+        if self.state is not CharState.RUNNING and self.state is not CharState.JUMPING:
             self.state = CharState.RUNNING
             self.run_animation.reset()
 
     def idle(self):
-        if self.state is CharState.JUMPING:
-            return
-        if self.state is not CharState.IDLE:
+        self.velocity_x = 0
+        if self.state is not CharState.IDLE and self.state is not CharState.JUMPING:
             self.state = CharState.IDLE
             self.idle_animation.reset()
 
     def jump(self):
-        if self.state is CharState.WALKING:
-            self.jump_speed = WALKING_SPEED
-        elif self.state is CharState.RUNNING:
-            self.jump_speed = RUNNING_SPEED
-        else:
-            return
-        self.state = CharState.JUMPING
-        self.jump_timer = 0
-        self.jump_start = self.rect.topleft
-        self.jump_animation.reset()
+        if self.state is not CharState.JUMPING:
+            self.velocity_y -= JUMP_VELOCITY
+            self.state = CharState.JUMPING
 
     def update(self, dt):
         self.state_anims[self.state].update(dt)
-        dir_mult = 1 if self.direction is Direction.RIGHT else -1
-        if self.state is CharState.WALKING:
-            self.rect.move_ip(WALKING_SPEED * dt * dir_mult, 0)
-        elif self.state is CharState.RUNNING:
-            self.rect.move_ip(RUNNING_SPEED * dt * dir_mult, 0)
-        elif self.state is CharState.JUMPING:
-            self._calc_jump(dt)
+        self.velocity_y += GRAVITY * dt
+        self.rect.move_ip(self.velocity_x * dt, self.velocity_y * dt)
 
     def check_collision(self, level):
         collisions = pygame.sprite.spritecollide(self, level.sprites, False)
@@ -117,32 +98,9 @@ class CharacterHandler(pygame.sprite.Sprite):
         elif o.left < self.rect.left:
             self.rect.left = o.right
 
-    def _calc_jump(self, dt):
-        self.jump_timer += dt
-        dir_mult = 1 if self.direction is Direction.RIGHT else -1
-        # Position in jump (0 to 1)
-        p = self.jump_timer / JUMP_LENGTH
-
-        if p >= 1:
-            # Jump complete, reset to idle
-            self.rect.topleft = (
-                self.jump_start[0] + JUMP_LENGTH * self.jump_speed * dir_mult,
-                self.jump_start[1],
-            )
-            self.state = CharState.IDLE
-        else:
-            x_offs = self.jump_timer * self.jump_speed * dir_mult
-            y_offs = 4 * JUMP_HEIGHT * p * (1 - p)
-            self.rect.topleft = (
-                self.jump_start[0] + x_offs,
-                self.jump_start[1] - y_offs,
-            )
-
     def draw(self, screen):
         screen.blit(
-            self.state_anims[self.state].get_current_frame(
-                self.direction is Direction.RIGHT
-            ),
+            self.state_anims[self.state].get_current_frame(self.velocity_x >= 0),
             add_coordinates(self.rect.topleft, self.sprite_offs),
         )
         if DRAW_BBOX:
