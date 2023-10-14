@@ -16,9 +16,13 @@ JUMP_HEIGHT = 50
 
 # Colors
 WHITE = (255, 255, 255)
+BLUE = (0, 0, 255)
 
 
 # Direction
 class Direction(Enum):
     RIGHT = 1
     LEFT = 2
+
+
+DRAW_BBOX = False

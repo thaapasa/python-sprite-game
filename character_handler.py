@@ -1,17 +1,18 @@
 import pygame
 from enum import Enum
 from defs import (
-    SCREEN_WIDTH,
-    SCREEN_HEIGHT,
     SPRITE_WIDTH,
     SPRITE_HEIGHT,
     WALKING_SPEED,
     RUNNING_SPEED,
     JUMP_LENGTH,
     JUMP_HEIGHT,
+    DRAW_BBOX,
+    BLUE,
     Direction,
 )
 from animation_handler import AnimationHandler
+from utils import add_coordinates
 
 
 class CharState(Enum):
@@ -26,6 +27,7 @@ class CharacterHandler:
         self.rect = pygame.Rect(
             14 * 32 - 128, 19 * 32 - 128, SPRITE_WIDTH, SPRITE_HEIGHT
         )
+        self.bbox = pygame.Rect(40, 55, SPRITE_WIDTH - 80, SPRITE_HEIGHT - 55)
 
         # Load animations
         self.idle_animation = AnimationHandler("sprites/idle-tileset.png", 8, 0.07)
@@ -121,3 +123,13 @@ class CharacterHandler:
             ),
             self.rect.topleft,
         )
+        if DRAW_BBOX:
+            pygame.draw.rect(
+                screen,
+                BLUE,
+                (
+                    add_coordinates(self.rect.topleft, self.bbox.topleft),
+                    (self.bbox.width, self.bbox.height),
+                ),
+                2,
+            )
