@@ -48,7 +48,6 @@ class LevelHandler:
         self.level = self._load_level(level, width, height)
         # Setup images
         self.tiles = self._setup_tiles()
-        print("Tiles", self.tiles)
 
     def _setup_tiles(self):
         # Load background
