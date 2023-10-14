@@ -17,6 +17,7 @@ JUMP_HEIGHT = 50
 # Colors
 WHITE = (255, 255, 255)
 BLUE = (0, 0, 255)
+RED = (255, 0, 0)
 
 
 # Direction

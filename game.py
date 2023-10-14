@@ -16,7 +16,7 @@ background = pygame.image.load("sprites/background.png")
 
 clock = pygame.time.Clock()
 
-char = CharacterHandler()
+char = CharacterHandler(11, 20)
 
 level = LevelHandler("level.txt", 40, 23)
 

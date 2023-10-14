@@ -1,4 +1,5 @@
 import pygame
+import pygame.sprite
 from enum import Enum
 from defs import (
     SPRITE_WIDTH,
@@ -22,12 +23,11 @@ class CharState(Enum):
     JUMPING = 4
 
 
-class CharacterHandler:
-    def __init__(self):
-        self.rect = pygame.Rect(
-            14 * 32 - 128, 19 * 32 - 128, SPRITE_WIDTH, SPRITE_HEIGHT
-        )
-        self.bbox = pygame.Rect(40, 55, SPRITE_WIDTH - 80, SPRITE_HEIGHT - 55)
+class CharacterHandler(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        pygame.sprite.Sprite.__init__(self)
+        self.rect = pygame.Rect(x * 32 - 128, y * 32 - 128, SPRITE_WIDTH, SPRITE_HEIGHT)
+        self.bounding_box = pygame.Rect(40, 55, SPRITE_WIDTH - 80, SPRITE_HEIGHT - 55)
 
         # Load animations
         self.idle_animation = AnimationHandler("sprites/idle-tileset.png", 8, 0.07)
@@ -128,8 +128,8 @@ class CharacterHandler:
                 screen,
                 BLUE,
                 (
-                    add_coordinates(self.rect.topleft, self.bbox.topleft),
-                    (self.bbox.width, self.bbox.height),
+                    add_coordinates(self.rect.topleft, self.bounding_box.topleft),
+                    (self.bounding_box.width, self.bounding_box.height),
                 ),
                 2,
             )

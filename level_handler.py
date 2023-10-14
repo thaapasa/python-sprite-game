@@ -1,5 +1,7 @@
 import pygame
+import pygame.sprite
 from enum import Enum
+from defs import DRAW_BBOX, RED
 
 
 TILE_WIDTH = 32
@@ -41,20 +43,39 @@ class TileType(Enum):
 TileType._lookup_map = {member.char: member for member in TileType}
 
 
+class BgTile(pygame.sprite.Sprite):
+    def __init__(self, tile: TileType, image: pygame.Surface, x: int, y: int):
+        pygame.sprite.Sprite.__init__(self)
+        self.tile = tile
+        self.rect = pygame.Rect(
+            x * TILE_WIDTH, y * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT
+        )
+        self.image = image
+
+
 class LevelHandler:
     def __init__(self, level, width, height):
         self.width = width
         self.height = height
-        self.level = self._load_level(level, width, height)
         # Setup images
         self.tiles = self._setup_tiles()
+        self.level = self._load_level(level, width, height)
+        self.sprites = self._create_sprites()
 
     def _setup_tiles(self):
         # Load background
         tileset = pygame.image.load("sprites/background-tileset.png")
         return {member.char: self._extract_tile(member, tileset) for member in TileType}
 
-    def _extract_tile(self, tile, tileset):
+    def _create_sprites(self):
+        sprites = pygame.sprite.Group()
+        for y, row in enumerate(self.level):
+            for x, tile in enumerate(row):
+                if tile is not None and tile is not TileType.EMPTY:
+                    sprites.add(BgTile(tile, self.tiles[tile.char], x, y))
+        return sprites
+
+    def _extract_tile(self, tile, tileset) -> pygame.Surface:
         pos = tile.tile_pos
         if pos[0] < 0 or pos[1] < 0:
             return pygame.Surface((32, 32), pygame.SRCALPHA)
@@ -70,7 +91,7 @@ class LevelHandler:
         # Create a 2D array based on the lines and characters
         level = [
             [
-                TileType.from_char(char) if len(line) > col else TileType.EMPTY
+                TileType.from_char(char) if len(line) > col else None
                 for col, char in enumerate(line)
             ]
             for line in lines
@@ -87,8 +108,7 @@ class LevelHandler:
         return level
 
     def draw(self, screen):
-        for x in range(self.width):
-            for y in range(self.height):
-                tile = self.level[y][x]
-                image = self.tiles[tile.char]
-                screen.blit(image, (x * TILE_WIDTH, y * TILE_HEIGHT))
+        self.sprites.draw(screen)
+        if DRAW_BBOX:
+            for tile in self.sprites:
+                pygame.draw.rect(screen, RED, tile.rect, 2)
