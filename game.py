@@ -16,7 +16,7 @@ background = pygame.image.load("sprites/background.png")
 
 clock = pygame.time.Clock()
 
-char = CharacterHandler(11, 20)
+char = CharacterHandler(9 * 32, 20 * 32)
 
 level = LevelHandler("level.txt", 40, 23)
 
@@ -51,6 +51,7 @@ while game_running:
         char.idle()
 
     char.update(dt)
+    char.check_collision(level)
 
     # Drawing
     screen.blit(background, (0, 0))

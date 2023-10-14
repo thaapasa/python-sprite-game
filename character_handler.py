@@ -23,11 +23,21 @@ class CharState(Enum):
     JUMPING = 4
 
 
+BBOX_WIDTH = 48
+BBOX_HEIGHT = 74
+
+
 class CharacterHandler(pygame.sprite.Sprite):
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
-        self.rect = pygame.Rect(x * 32 - 128, y * 32 - 128, SPRITE_WIDTH, SPRITE_HEIGHT)
-        self.bounding_box = pygame.Rect(40, 55, SPRITE_WIDTH - 80, SPRITE_HEIGHT - 55)
+        # rect is the bounding box
+        self.rect = pygame.Rect(
+            x - BBOX_WIDTH / 2, y - BBOX_HEIGHT, BBOX_WIDTH, BBOX_HEIGHT
+        )
+        self.sprite_offs = (
+            BBOX_WIDTH / 2 - SPRITE_WIDTH / 2,
+            -(SPRITE_HEIGHT - BBOX_HEIGHT),
+        )
 
         # Load animations
         self.idle_animation = AnimationHandler("sprites/idle-tileset.png", 8, 0.07)
@@ -95,6 +105,11 @@ class CharacterHandler(pygame.sprite.Sprite):
         elif self.state is CharState.JUMPING:
             self._calc_jump(dt)
 
+    def check_collision(self, level):
+        collisions = pygame.sprite.spritecollide(self, level.sprites, False)
+        if collisions:
+            print("Collisions", collisions)
+
     def _calc_jump(self, dt):
         self.jump_timer += dt
         dir_mult = 1 if self.direction is Direction.RIGHT else -1
@@ -121,15 +136,7 @@ class CharacterHandler(pygame.sprite.Sprite):
             self.state_anims[self.state].get_current_frame(
                 self.direction is Direction.RIGHT
             ),
-            self.rect.topleft,
+            add_coordinates(self.rect.topleft, self.sprite_offs),
         )
         if DRAW_BBOX:
-            pygame.draw.rect(
-                screen,
-                BLUE,
-                (
-                    add_coordinates(self.rect.topleft, self.bounding_box.topleft),
-                    (self.bounding_box.width, self.bounding_box.height),
-                ),
-                2,
-            )
+            pygame.draw.rect(screen, BLUE, self.rect, 2)
