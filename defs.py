@@ -3,8 +3,8 @@ from enum import Enum
 # Speeds are pixels per second
 WALKING_SPEED = 240
 RUNNING_SPEED = 360
-JUMP_VELOCITY = 400
-GRAVITY = 980
+JUMP_VELOCITY = 500
+GRAVITY = 1500
 MAX_VELOCITY_Y = 1200
 
 SCREEN_WIDTH = 1280
@@ -25,4 +25,4 @@ class Direction(Enum):
     LEFT = 2
 
 
-DRAW_BBOX = True
+DRAW_BBOX = False

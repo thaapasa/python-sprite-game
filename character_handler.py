@@ -52,7 +52,9 @@ class CharacterHandler(pygame.sprite.Sprite):
         self.idle_animation = AnimationHandler("sprites/idle-tileset.png", 8, 0.07)
         self.walk_animation = AnimationHandler("sprites/walk-tileset.png", 8, 0.05)
         self.run_animation = AnimationHandler("sprites/run-tileset.png", 8, 0.04)
-        self.jump_animation = AnimationHandler("sprites/jump-tileset.png", 8, 0.05)
+        self.jump_animation = AnimationHandler(
+            "sprites/jump-tileset.png", 8, 0.05, loop=False
+        )
 
         self.state = CharState.IDLE
         self.state_anims = {
@@ -84,6 +86,7 @@ class CharacterHandler(pygame.sprite.Sprite):
         if self.state is not CharState.JUMPING:
             self.velocity_y -= JUMP_VELOCITY
             self.state = CharState.JUMPING
+            self.jump_animation.reset()
 
     def update(self, dt, level):
         self.grounded = False
