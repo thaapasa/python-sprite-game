@@ -25,7 +25,7 @@ class CharState(Enum):
     JUMPING = 4
 
 
-BBOX_WIDTH = 48
+BBOX_WIDTH = 42
 BBOX_HEIGHT = 74
 
 
@@ -53,7 +53,7 @@ class CharacterHandler(pygame.sprite.Sprite):
         self.walk_animation = AnimationHandler("sprites/walk-tileset.png", 8, 0.05)
         self.run_animation = AnimationHandler("sprites/run-tileset.png", 8, 0.04)
         self.jump_animation = AnimationHandler(
-            "sprites/jump-tileset.png", 8, 0.05, loop=False
+            "sprites/jump-tileset.png", 8, 0.07, loop=False
         )
 
         self.state = CharState.IDLE
