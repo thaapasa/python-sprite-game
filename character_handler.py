@@ -107,8 +107,15 @@ class CharacterHandler(pygame.sprite.Sprite):
 
     def check_collision(self, level):
         collisions = pygame.sprite.spritecollide(self, level.sprites, False)
-        if collisions:
-            print("Collisions", collisions)
+        for c in collisions:
+            self._resolve_collision(c)
+
+    def _resolve_collision(self, sprite: pygame.sprite.Sprite):
+        o = sprite.rect
+        if o.right > self.rect.right:
+            self.rect.right = o.left
+        elif o.left < self.rect.left:
+            self.rect.left = o.right
 
     def _calc_jump(self, dt):
         self.jump_timer += dt
