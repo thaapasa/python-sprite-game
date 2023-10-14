@@ -8,11 +8,13 @@ from defs import (
     RUNNING_SPEED,
     DRAW_BBOX,
     JUMP_VELOCITY,
+    MAX_VELOCITY_Y,
     BLUE,
     GRAVITY,
     Direction,
 )
 from animation_handler import AnimationHandler
+from collision import find_mtv
 from utils import add_coordinates
 
 
@@ -43,6 +45,8 @@ class CharacterHandler(pygame.sprite.Sprite):
         )
         self.velocity_x = 0
         self.velocity_y = 0
+
+        self.grounded = True
 
         # Load animations
         self.idle_animation = AnimationHandler("sprites/idle-tileset.png", 8, 0.07)
@@ -81,22 +85,33 @@ class CharacterHandler(pygame.sprite.Sprite):
             self.velocity_y -= JUMP_VELOCITY
             self.state = CharState.JUMPING
 
-    def update(self, dt):
+    def update(self, dt, level):
+        self.grounded = False
         self.state_anims[self.state].update(dt)
-        self.velocity_y += GRAVITY * dt
+        self.velocity_y += min(GRAVITY * dt, MAX_VELOCITY_Y)
         self.rect.move_ip(self.velocity_x * dt, self.velocity_y * dt)
+        self._check_collision(level)
+        if self.state == CharState.JUMPING and self.grounded:
+            self.state = CharState.IDLE
 
-    def check_collision(self, level):
+    def _check_collision(self, level):
         collisions = pygame.sprite.spritecollide(self, level.sprites, False)
         for c in collisions:
             self._resolve_collision(c)
 
+    def velocity(self) -> pygame.Vector2:
+        if self.velocity_x == 0 and self.velocity_y == 0:
+            return pygame.Vector2(0, GRAVITY)
+        return pygame.Vector2(self.velocity_x, self.velocity_y)
+
     def _resolve_collision(self, sprite: pygame.sprite.Sprite):
-        o = sprite.rect
-        if o.right > self.rect.right:
-            self.rect.right = o.left
-        elif o.left < self.rect.left:
-            self.rect.left = o.right
+        adj = find_mtv(self.rect, sprite.rect, self.velocity())
+        if not adj:
+            return
+
+        self.rect.move_ip(adj)
+        self.velocity_y = 0
+        self.grounded = True
 
     def draw(self, screen):
         screen.blit(

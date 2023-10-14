@@ -50,8 +50,7 @@ while game_running:
     else:
         char.idle()
 
-    char.update(dt)
-    char.check_collision(level)
+    char.update(dt, level)
 
     # Drawing
     screen.blit(background, (0, 0))
