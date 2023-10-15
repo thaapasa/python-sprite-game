@@ -13,6 +13,7 @@ from defs import (
     GRAVITY,
     Direction,
 )
+from level_handler import LevelHandler
 from animation_handler import AnimationHandler
 from collision import find_mtv
 from utils import add_coordinates
@@ -47,6 +48,8 @@ class CharacterHandler(pygame.sprite.Sprite):
         self.velocity_y = 0
 
         self.grounded = True
+
+        self.ground_test = pygame.sprite.Sprite()
 
         # Load animations
         self.idle_animation = AnimationHandler("sprites/idle-tileset.png", 8, 0.07)
@@ -83,19 +86,24 @@ class CharacterHandler(pygame.sprite.Sprite):
             self.idle_animation.reset()
 
     def jump(self):
-        if self.state is not CharState.JUMPING:
+        if self.state is not CharState.JUMPING and self.grounded:
             self.velocity_y -= JUMP_VELOCITY
             self.state = CharState.JUMPING
             self.jump_animation.reset()
 
-    def update(self, dt, level):
-        self.grounded = False
+    def update(self, dt, level: LevelHandler):
         self.state_anims[self.state].update(dt)
         self.velocity_y += min(GRAVITY * dt, MAX_VELOCITY_Y)
         self.rect.move_ip(self.velocity_x * dt, self.velocity_y * dt)
         self._check_collision(level)
-        if self.state == CharState.JUMPING and self.grounded:
-            self.state = CharState.IDLE
+        if pygame.sprite.spritecollide(self, level.sprites, False):
+            print("Warning! Player collides after collision check")
+        self.grounded = self._is_grounded(level)
+        if self.grounded:
+            self.velocity_y = 0
+            if self.state == CharState.JUMPING:
+                self.state = CharState.IDLE
+                self.idle_animation.reset()
 
     def _check_collision(self, level):
         collisions = pygame.sprite.spritecollide(self, level.sprites, False)
@@ -107,14 +115,18 @@ class CharacterHandler(pygame.sprite.Sprite):
             return pygame.Vector2(0, GRAVITY)
         return pygame.Vector2(self.velocity_x, self.velocity_y)
 
+    def _is_grounded(self, level: LevelHandler) -> bool:
+        self.ground_test.rect = pygame.rect.Rect(
+            self.rect.left + 5, self.rect.bottom, self.rect.width - 10, 1
+        )
+        collides = pygame.sprite.spritecollide(self.ground_test, level.sprites, False)
+        return not not collides
+
     def _resolve_collision(self, sprite: pygame.sprite.Sprite):
         adj = find_mtv(self.rect, sprite.rect, self.velocity())
         if not adj:
             return
-
         self.rect.move_ip(adj)
-        self.velocity_y = 0
-        self.grounded = True
 
     def draw(self, screen):
         screen.blit(
