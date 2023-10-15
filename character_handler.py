@@ -46,6 +46,7 @@ class CharacterHandler(pygame.sprite.Sprite):
         )
         self.velocity_x = 0
         self.velocity_y = 0
+        self.direction = Direction.RIGHT
 
         self.grounded = True
 
@@ -69,12 +70,14 @@ class CharacterHandler(pygame.sprite.Sprite):
 
     def walk(self, direction: Direction):
         self.velocity_x = DIR_MULT[direction] * WALKING_SPEED
+        self.direction = direction
         if self.state is not CharState.WALKING and self.grounded:
             self.state = CharState.WALKING
             self.walk_animation.reset()
 
     def run(self, direction):
         self.velocity_x = DIR_MULT[direction] * RUNNING_SPEED
+        self.direction = direction
         if self.state is not CharState.RUNNING and self.grounded:
             self.state = CharState.RUNNING
             self.run_animation.reset()
@@ -135,7 +138,9 @@ class CharacterHandler(pygame.sprite.Sprite):
 
     def draw(self, screen):
         screen.blit(
-            self.state_anims[self.state].get_current_frame(self.velocity_x >= 0),
+            self.state_anims[self.state].get_current_frame(
+                self.direction == Direction.RIGHT
+            ),
             add_coordinates(self.rect.topleft, self.sprite_offs),
         )
         if DRAW_BBOX:
