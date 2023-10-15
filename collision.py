@@ -13,23 +13,27 @@ def find_mtv(target: pygame.Rect, o: pygame.Rect, velocity: pygame.Vector2):
     if cx == 0 and cy == 0:
         return None
 
-    # Adjust direction
-    if target.centerx < o.centerx:
-        cx = -cx
-    if target.centery < o.centery:
-        cy = -cy
-
-    # Make very small adjustments simply
-    if abs(cx) <= 1:
-        return (cx, 0)
-    if abs(cy) <= 1:
-        return (0, cy)
-
     # pushback
     pb = velocity.normalize() * -1
 
-    if pb[1] == 0 and abs(cx / cy) > 5:
-        return (0, cy)
+    # Adjust direction
+    if pb[0] < 0:
+        cx = -cx
+    if pb[1] < 0:
+        cy = -cy
+
+    # Try to move char back along x-axis
+    if abs(pb[0]) > 0 and abs(cx) > 0 and abs(cx) < 10:
+        return (cx, 0)
+
+    # Make very small adjustments simply
+    # if abs(cx) <= 1:
+    #    return (cx, 0)
+    # if abs(cy) <= 1:
+    #    return (0, cy)
+
+    # if pb[1] == 0 and abs(cx / cy) > 5:
+    #    return (0, cy)
 
     if pb.x == 0:
         return (0, cy)

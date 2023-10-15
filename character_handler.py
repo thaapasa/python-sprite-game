@@ -93,8 +93,11 @@ class CharacterHandler(pygame.sprite.Sprite):
 
     def update(self, dt, level: LevelHandler):
         self.state_anims[self.state].update(dt)
+        # Update velocity
         self.velocity_y += min(GRAVITY * dt, MAX_VELOCITY_Y)
+        # Move player
         self.rect.move_ip(self.velocity_x * dt, self.velocity_y * dt)
+        # Check for collision
         self._check_collision(level)
         if pygame.sprite.spritecollide(self, level.sprites, False):
             print("Warning! Player collides after collision check")
@@ -109,6 +112,11 @@ class CharacterHandler(pygame.sprite.Sprite):
         collisions = pygame.sprite.spritecollide(self, level.sprites, False)
         for c in collisions:
             self._resolve_collision(c)
+        collisions = pygame.sprite.spritecollide(self, level.sprites, False)
+        if collisions:
+            self.velocity_x = 0
+            for c in collisions:
+                self._resolve_collision(c)
 
     def velocity(self) -> pygame.Vector2:
         if self.velocity_x == 0 and self.velocity_y == 0:
