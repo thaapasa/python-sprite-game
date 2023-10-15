@@ -81,7 +81,7 @@ class CharacterHandler(pygame.sprite.Sprite):
 
     def idle(self):
         self.velocity_x = 0
-        if self.state is not CharState.IDLE and self.state is not CharState.JUMPING:
+        if self.state is not CharState.IDLE and self.grounded:
             self.state = CharState.IDLE
             self.idle_animation.reset()
 
