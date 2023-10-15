@@ -4,13 +4,8 @@ from enum import Enum
 from defs import (
     SPRITE_WIDTH,
     SPRITE_HEIGHT,
-    WALKING_SPEED,
-    RUNNING_SPEED,
     DRAW_BBOX,
-    JUMP_VELOCITY,
-    MAX_VELOCITY_Y,
     BLUE,
-    GRAVITY,
     Direction,
 )
 from level_handler import LevelHandler
@@ -31,6 +26,22 @@ BBOX_HEIGHT = 74
 
 
 DIR_MULT = {Direction.LEFT: -1, Direction.RIGHT: 1}
+
+
+# Speeds are pixels per second
+WALKING_SPEED = 240
+RUNNING_SPEED = 360
+JUMP_VELOCITY = 500
+GRAVITY = 2000
+MAX_VELOCITY_Y = 1200
+
+
+JUMP_VELOCITY = {
+    CharState.IDLE: 500,
+    CharState.WALKING: 580,
+    CharState.RUNNING: 700,
+    CharState.JUMPING: 600,
+}
 
 
 class CharacterHandler(pygame.sprite.Sprite):
@@ -57,7 +68,7 @@ class CharacterHandler(pygame.sprite.Sprite):
         self.walk_animation = AnimationHandler("sprites/walk-tileset.png", 8, 0.05)
         self.run_animation = AnimationHandler("sprites/run-tileset.png", 8, 0.04)
         self.jump_animation = AnimationHandler(
-            "sprites/jump-tileset.png", 8, 0.07, loop=False
+            "sprites/jump-tileset.png", 8, 0.06, loop=False
         )
 
         self.state = CharState.IDLE
@@ -90,7 +101,7 @@ class CharacterHandler(pygame.sprite.Sprite):
 
     def jump(self):
         if self.state is not CharState.JUMPING and self.grounded:
-            self.velocity_y -= JUMP_VELOCITY
+            self.velocity_y -= JUMP_VELOCITY[self.state]
             self.state = CharState.JUMPING
             self.jump_animation.reset()
 
