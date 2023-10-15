@@ -69,13 +69,13 @@ class CharacterHandler(pygame.sprite.Sprite):
 
     def walk(self, direction: Direction):
         self.velocity_x = DIR_MULT[direction] * WALKING_SPEED
-        if self.state is not CharState.WALKING and self.state is not CharState.JUMPING:
+        if self.state is not CharState.WALKING and self.grounded:
             self.state = CharState.WALKING
             self.walk_animation.reset()
 
     def run(self, direction):
         self.velocity_x = DIR_MULT[direction] * RUNNING_SPEED
-        if self.state is not CharState.RUNNING and self.state is not CharState.JUMPING:
+        if self.state is not CharState.RUNNING and self.grounded:
             self.state = CharState.RUNNING
             self.run_animation.reset()
 
@@ -95,28 +95,25 @@ class CharacterHandler(pygame.sprite.Sprite):
         self.state_anims[self.state].update(dt)
         # Update velocity
         self.velocity_y += min(GRAVITY * dt, MAX_VELOCITY_Y)
-        # Move player
-        self.rect.move_ip(self.velocity_x * dt, self.velocity_y * dt)
-        # Check for collision
-        self._check_collision(level)
+        # Move player along x
+        self.rect.move_ip(self.velocity_x * dt, 0)
+        # Check for collision on x-axis
+        self._check_collision(level, True)
+        # Move player along y
+        self.rect.move_ip(0, self.velocity_y * dt)
+        # Check for collision on y-axis
+        self._check_collision(level, False)
+
         if pygame.sprite.spritecollide(self, level.sprites, False):
             print("Warning! Player collides after collision check")
         self.grounded = self._is_grounded(level)
         if self.grounded:
             self.velocity_y = 0
-            if self.state == CharState.JUMPING:
-                self.state = CharState.IDLE
-                self.idle_animation.reset()
 
-    def _check_collision(self, level):
+    def _check_collision(self, level, along_x: bool):
         collisions = pygame.sprite.spritecollide(self, level.sprites, False)
         for c in collisions:
-            self._resolve_collision(c)
-        collisions = pygame.sprite.spritecollide(self, level.sprites, False)
-        if collisions:
-            self.velocity_x = 0
-            for c in collisions:
-                self._resolve_collision(c)
+            self._resolve_collision(c, along_x)
 
     def velocity(self) -> pygame.Vector2:
         if self.velocity_x == 0 and self.velocity_y == 0:
@@ -130,8 +127,8 @@ class CharacterHandler(pygame.sprite.Sprite):
         collides = pygame.sprite.spritecollide(self.ground_test, level.sprites, False)
         return not not collides
 
-    def _resolve_collision(self, sprite: pygame.sprite.Sprite):
-        adj = find_mtv(self.rect, sprite.rect, self.velocity())
+    def _resolve_collision(self, sprite: pygame.sprite.Sprite, along_x: bool):
+        adj = find_mtv(self.rect, sprite.rect, self.velocity(), along_x)
         if not adj:
             return
         self.rect.move_ip(adj)
